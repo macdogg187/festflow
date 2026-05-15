@@ -18,6 +18,11 @@ export interface FestivalScrapeConfig {
   image_urls?: string[];
   bandsintown_query?: string;
   songkick_query?: string;
+  /** Inclusive festival start date (YYYY-MM-DD). Set by the API route from the
+   * festivals table; scrapers use it to reject events from prior/other years. */
+  festival_start_date?: string;
+  /** Inclusive festival end date (YYYY-MM-DD). */
+  festival_end_date?: string;
 }
 
 export interface ScheduleSelectors {

@@ -26,8 +26,8 @@ export async function GET(request: Request) {
   }
 
   for (const festival of festivals) {
-    const config = getFestivalConfig(festival.slug);
-    if (!config) continue;
+    const baseConfig = getFestivalConfig(festival.slug);
+    if (!baseConfig) continue;
 
     const today = new Date();
     const endDate = new Date(festival.end_date + "T00:00:00");
@@ -36,6 +36,12 @@ export async function GET(request: Request) {
     if (today < weekBefore || today > new Date(endDate.getTime() + 2 * 86400000)) {
       continue;
     }
+
+    const config = {
+      ...baseConfig,
+      festival_start_date: festival.start_date,
+      festival_end_date: festival.end_date,
+    };
 
     const enabledSources = getAvailableSources();
 

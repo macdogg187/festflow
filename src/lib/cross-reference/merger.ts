@@ -22,7 +22,23 @@ export function mergeScrapeResults(
 
   for (const result of results) {
     for (const raw of result.sets) {
-      normalizedSets.push(normalizeRawSet(raw, festivalStart, festivalEnd));
+      const normalized = normalizeRawSet(raw, festivalStart, festivalEnd);
+
+      // Cross-reference safety net: if we know the festival window, refuse to
+      // approve sets whose normalized day falls outside it. This blocks
+      // wrong-year data (e.g. 2024 Bandsintown / 2025 Songkick results) from
+      // ever entering the sets table even if a source scraper missed it.
+      if (
+        festivalStart &&
+        festivalEnd &&
+        /^\d{4}-\d{2}-\d{2}$/.test(normalized.day_normalized) &&
+        (normalized.day_normalized < festivalStart ||
+          normalized.day_normalized > festivalEnd)
+      ) {
+        continue;
+      }
+
+      normalizedSets.push(normalized);
     }
   }
 

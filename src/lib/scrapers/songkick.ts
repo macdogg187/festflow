@@ -63,11 +63,19 @@ export async function scrapeSongkick(
       return { source_type: "songkick", sets, scraped_at: new Date().toISOString(), errors };
     }
 
-    const festivalEvent = events.find(
-      (e) =>
-        e.type === "Festival" &&
-        e.displayName.toLowerCase().includes(query.toLowerCase().replace(/-/g, " "))
-    ) || events[0];
+    const start = config.festival_start_date;
+    const end = config.festival_end_date;
+    const inWindow = (d?: string) => !start || !end || (!!d && d >= start && d <= end);
+    const nameMatches = (e: SongkickEvent) =>
+      e.displayName.toLowerCase().includes(query.toLowerCase().replace(/-/g, " "));
+
+    // Prefer a Festival-typed event whose start.date falls within the festival
+    // window so we don't grab the 2024 or 2025 Kilby Block Party Songkick page.
+    const festivalEvent =
+      events.find((e) => e.type === "Festival" && nameMatches(e) && inWindow(e.start?.date)) ||
+      events.find((e) => nameMatches(e) && inWindow(e.start?.date)) ||
+      events.find((e) => e.type === "Festival" && nameMatches(e)) ||
+      events[0];
 
     const detailUrl = `${SONGKICK_BASE}/events/${festivalEvent.id}.json?apikey=${apiKey}`;
     const detailResponse = await fetch(detailUrl, {
@@ -90,6 +98,13 @@ export async function scrapeSongkick(
     const day = event.start.date;
     const startTime = event.start.time || undefined;
     const stage = event.venue?.displayName;
+
+    if (!inWindow(day)) {
+      errors.push(
+        `Songkick best-match event (${festivalEvent.displayName}, ${day}) is outside festival window ${start} … ${end}; discarding ${event.performance.length} performances`
+      );
+      return { source_type: "songkick", sets, scraped_at: new Date().toISOString(), errors };
+    }
 
     for (const perf of event.performance) {
       sets.push({

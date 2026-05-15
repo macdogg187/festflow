@@ -2,6 +2,15 @@ import type { RawSetTime, ScrapeResult, FestivalScrapeConfig } from "./types";
 
 const BANDSINTOWN_BASE = "https://rest.bandsintown.com";
 
+function isWithinFestivalWindow(
+  dayISO: string,
+  start?: string,
+  end?: string
+): boolean {
+  if (!start || !end) return true;
+  return dayISO >= start && dayISO <= end;
+}
+
 interface BandsintownEvent {
   id: string;
   title: string;
@@ -55,10 +64,18 @@ export async function scrapeBandsintown(
       return { source_type: "bandsintown", sets, scraped_at: new Date().toISOString(), errors };
     }
 
+    let droppedOutOfWindow = 0;
     for (const event of artistData.events) {
       const eventDate = new Date(event.datetime);
       const day = eventDate.toISOString().split("T")[0];
       const start_time = eventDate.toTimeString().slice(0, 5);
+
+      // Cross-reference event year/date against the festival window so the
+      // 2024/2025 Kilby Block Party events can never leak into the 2026 data.
+      if (!isWithinFestivalWindow(day, config.festival_start_date, config.festival_end_date)) {
+        droppedOutOfWindow++;
+        continue;
+      }
 
       sets.push({
         artist_name: event.title || artistData.name,
@@ -69,6 +86,12 @@ export async function scrapeBandsintown(
         source_url: `https://bandsintown.com/${query}`,
         confidence: "medium",
       });
+    }
+
+    if (droppedOutOfWindow > 0) {
+      errors.push(
+        `Filtered out ${droppedOutOfWindow} Bandsintown event(s) outside festival window ${config.festival_start_date} … ${config.festival_end_date}`
+      );
     }
   } catch (err) {
     errors.push(

@@ -38,13 +38,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const config = getFestivalConfig(festival_slug);
-    if (!config) {
+    const baseConfig = getFestivalConfig(festival_slug);
+    if (!baseConfig) {
       return NextResponse.json(
         { error: `No scrape config for "${festival_slug}"` },
         { status: 404 }
       );
     }
+
+    // Inject festival date window so scrapers can cross-reference event year
+    // and reject prior-year results (see merger.ts safety net for backstop).
+    const config = {
+      ...baseConfig,
+      festival_start_date: festival.start_date,
+      festival_end_date: festival.end_date,
+    };
 
     const enabledSources = getAvailableSources(sources);
 
