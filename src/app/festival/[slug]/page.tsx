@@ -1,14 +1,22 @@
+import { createClient } from "@/lib/supabase/server";
 import { FestivalPageClient } from "./FestivalPageClient";
+import type { Festival } from "@/types";
 
-const FESTIVAL_META = {
-  name: "Chels Block Party",
-  slug: "kilby-block-party-2026",
-  location: "Utah State Fairpark, Salt Lake City",
-  startDate: "2026-05-15",
-  endDate: "2026-05-17",
-  mapUrl: "https://kilbyblockparty.com/map",
-};
+export default async function FestivalPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const supabase = await createClient();
 
-export default function FestivalPage() {
-  return <FestivalPageClient festival={FESTIVAL_META} />;
+  const { data: festival } = await supabase
+    .from("festivals")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  const festivalMeta: Festival | null = festival as Festival | null;
+
+  return <FestivalPageClient festival={festivalMeta} slug={slug} />;
 }

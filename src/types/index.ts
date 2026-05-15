@@ -16,6 +16,32 @@ export interface FestivalSet {
   day: string;
   start_time: string;
   end_time: string;
+  sources?: { source_type: string; source_url: string }[];
+}
+
+export interface SetTimeReview {
+  id: string;
+  festival_id: string;
+  artist_name: string;
+  stage: string | null;
+  day: string;
+  field: "start_time" | "end_time" | "stage";
+  values: { source: string; value: string }[];
+  status: "pending" | "resolved";
+  resolved_value: string | null;
+  resolved_at: string | null;
+  resolved_by: string | null;
+}
+
+export interface ScrapeJob {
+  id: string;
+  festival_id: string;
+  source_type: string;
+  status: "running" | "completed" | "failed";
+  started_at: string;
+  completed_at: string | null;
+  error_message: string | null;
+  sets_found: number;
 }
 
 export interface UserSchedule {
