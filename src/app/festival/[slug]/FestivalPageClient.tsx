@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 import { DaySwitcher } from "@/components/DaySwitcher";
 import { FestivalMapLink } from "@/components/FestivalMapLink";
 import { AuthButton } from "@/components/AuthButton";
-import { UploadZone } from "@/components/UploadZone";
 import { ScheduleTimeline } from "@/components/ScheduleTimeline";
 import { WeatherCard } from "@/components/WeatherCard";
 import { useSchedule } from "@/hooks/useSchedule";
@@ -38,7 +37,6 @@ export function FestivalPageClient({ festival, slug }: FestivalPageClientProps) 
   const festivalId = festivalData?.id;
   const { daySets, selectedSets, selectedIds, toggleSet, autoSelectByNames, conflicts, loading } = useSchedule(activeDay, festivalId);
 
-  const displayName = festivalData?.name ?? slug.replace(/-/g, " ").toUpperCase();
   const location = festivalData?.location ?? "";
   const startDate = festivalData?.start_date ?? "";
   const endDate = festivalData?.end_date ?? "";
@@ -54,7 +52,7 @@ export function FestivalPageClient({ festival, slug }: FestivalPageClientProps) 
             <span
               className="font-[family-name:var(--font-display)] text-lg tracking-wider neon-text-pink"
             >
-              FESTFLOW
+              CHELS BLOCK PARTY
             </span>
           </div>
           <AuthButton />
@@ -67,7 +65,7 @@ export function FestivalPageClient({ festival, slug }: FestivalPageClientProps) 
           <h1
             className="font-[family-name:var(--font-display)] text-3xl sm:text-5xl neon-text-pink tracking-wider"
           >
-            {displayName}
+            CHELS BLOCK PARTY
           </h1>
           {location && (
             <p className="text-neon-cyan mt-2 text-sm sm:text-base tracking-wide">
@@ -80,7 +78,7 @@ export function FestivalPageClient({ festival, slug }: FestivalPageClientProps) 
             </p>
           )}
           <div className="mt-4">
-            <FestivalMapLink mapUrl={mapUrl} festivalName={displayName} />
+            <FestivalMapLink mapUrl={mapUrl} festivalName="Chels Block Party" />
           </div>
         </div>
       </section>
@@ -92,11 +90,10 @@ export function FestivalPageClient({ festival, slug }: FestivalPageClientProps) 
         </div>
       </section>
 
-      {/* Day Switcher + Upload */}
+      {/* Day Switcher */}
       <section className="border-b border-border">
-        <div className="container mx-auto px-4 py-3 space-y-3">
+        <div className="container mx-auto px-4 py-3">
           <DaySwitcher activeDay={activeDay} onDayChange={setActiveDay} />
-          <UploadZone onArtistsDetected={autoSelectByNames} />
         </div>
       </section>
 
@@ -123,7 +120,7 @@ export function FestivalPageClient({ festival, slug }: FestivalPageClientProps) 
       {/* Footer */}
       <footer className="border-t border-neon-yellow/20 py-4 text-center">
         <span className="neon-text-yellow text-xs font-[family-name:var(--font-display)] tracking-wider">
-          {displayName}
+          CHELS BLOCK PARTY
         </span>
         {startDate && endDate && (
           <span className="text-muted-foreground text-xs ml-2">
